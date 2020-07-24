@@ -1,0 +1,47 @@
+
+resources:
+- name: busybox-image
+  type: registry-image
+  icon: docker
+  source:
+    repository: busybox
+    tag: latest
+
+
+task-config: &task-config
+  platform: linux
+  run:
+    path: /bin/sh
+    args:
+      - -c
+      - |
+        echo "$SOME_SECRET"
+        echo "$TASK_NAME"
+
+
+jobs:
+- name: test-1
+  public: true
+  serial: true
+  plan:
+  - get: busybox-image
+  - task: test-task
+    image: busybox-image
+    config:
+      params:
+        SOME_SECRET: ((some_secret))
+        TASK_NAME: test-1
+      << : *task-config
+
+- name: test-2
+  public: true
+  serial: true
+  plan:
+  - get: busybox-image
+  - task: test-task
+    image: busybox-image
+    config:
+      params:
+        SOME_SECRET: ((some_secret))
+        TASK_NAME: test-2
+      << : *task-config
